@@ -1,6 +1,17 @@
 # Target library
 lib := libuthread.a
+objs    := queue.o
+
+CC	:= gcc
+CFLAGS  := -Wall -Wextra -Werror -MMD
 
 all: $(lib)
 
-## TODO: Phase 1
+$(lib): $(objs)
+	ar rcs $@ $^
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+clean:
+	rm -f $(targets) $(objs) $(deps)

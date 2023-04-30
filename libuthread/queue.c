@@ -88,7 +88,7 @@ int queue_delete(queue_t queue, void *data) {
     struct node *previous_node = NULL;
 
     while (current_node != NULL) {
-        if (current_node->data == data) {
+        if (current_node->data == data) {  // Compares data by address
             if (previous_node == NULL) {
                 // Current node is head, update head to point at next node
                 queue->head = current_node->next;
@@ -127,7 +127,7 @@ int queue_iterate(queue_t queue, queue_func_t func) {
         next_node = current_node->next;
         func(queue, current_node->data);
 
-        // If current node is deleted, then next node is already set
+        // If current node is deleted, next is already set to avoid segfault
         current_node = next_node;
     }
 
@@ -138,28 +138,4 @@ int queue_length(queue_t queue) {
     if (queue == NULL) return -1;
 
     return queue->length;
-}
-
-// testing
-void test_create(void) {
-    queue_t q;
-
-    q = queue_create();
-    assert(q != NULL);
-}
-
-void test_queue_simple(void) {
-    queue_t q;
-    int data = 3, *ptr;
-
-    q = queue_create();
-    queue_enqueue(q, &data);
-    queue_dequeue(q, (void **)&ptr);
-    assert(ptr == &data);
-}
-
-int main() {
-    test_create();
-    test_queue_simple();
-    return 0;
 }
