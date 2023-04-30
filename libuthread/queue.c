@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -64,7 +65,7 @@ int queue_enqueue(queue_t queue, void *data) {
 
 int queue_dequeue(queue_t queue, void **data) {
     if (queue == NULL) return -1;
-    if (*data == NULL) return -1;
+    if (data == NULL) return -1;
     if (queue->length == 0) return -1;
 
     struct node *current_node = queue->head;
