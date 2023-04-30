@@ -14,4 +14,4 @@ $(lib): $(objs)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(targets) $(objs) $(deps)
+	rm -f *.o *.d *.a
