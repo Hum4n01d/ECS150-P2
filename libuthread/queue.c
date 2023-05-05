@@ -18,7 +18,7 @@ struct queue {
 };
 
 queue_t queue_create(void) {
-    queue_t q = malloc(sizeof(struct queue));
+    queue_t q = (queue_t)malloc(sizeof(struct queue));
 
     // Memory allocation error
     if (q == NULL) return NULL;
