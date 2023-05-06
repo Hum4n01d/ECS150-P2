@@ -1,6 +1,7 @@
 /*
 Memory see
 All errors see
+uthread_ctx_switch error so auto handled sense and we not worry, right?
 */
 
 #include "uthread.h"
@@ -34,12 +35,19 @@ void uthread_yield(void) {
     /* TODO Phase 2 */
     struct uthread_tcb* current_uthread = uthread_current();
     struct uthread_tcb* next_uthread = NULL;
-    queue_enqueue(current_uthread);
+    queue_enqueue(scheduling_queue, current_uthread);
     queue_dequeue(scheduling_queue, &next_uthread);
     uthread_ctx_switch(current_uthread, next_uthread);
 }
 
-void uthread_exit(void) { /* TODO Phase 2 */ }
+void uthread_exit(void) {
+    /* TODO Phase 2 */
+    struct uthread_tcb* current_uthread = uthread_current();
+    struct uthread_tcb* next_uthread = NULL;
+    queue_enqueue(zombie_queue, current_uthread);
+    queue_dequeue(scheduling_queue, &next_uthread);
+    uthread_ctx_switch(current_uthread, next_uthread);
+}
 
 int uthread_create(uthread_func_t func, void* arg) {
     /* TODO Phase 2 */
@@ -65,10 +73,13 @@ int uthread_create(uthread_func_t func, void* arg) {
 int uthread_run(bool preempt, uthread_func_t func, void* arg) {
     /* TODO Phase 2 */
     scheduling_queue = queue_create();
+    zombie_queue = queue_create();
     int initial_thread_success = uthread_create(func, arg);
     while (queue_length(scheduling_queue)) {
         uthread_yield();
     }
+    queue_destroy(scheduling_queue);
+    queue_destroy(zombie_queue);
 }
 
 void uthread_block(void) { /* TODO Phase 3 */ }
