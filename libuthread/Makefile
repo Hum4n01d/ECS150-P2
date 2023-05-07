@@ -1,6 +1,6 @@
 # Target library
 lib := libuthread.a
-objs    := queue.o uthread.o context.o preempt.o
+objs    := queue.o uthread.o context.o preempt.o sem.o
 
 # removed -Werror for now
 

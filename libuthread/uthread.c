@@ -2,6 +2,12 @@
 Memory see
 All errors see
 uthread_ctx_switch error so auto handled sense and we not worry, right?
+context deletion and allocation mem see
+zombie delete where see
+where do we use iterate()?
+use global variable inside or function returned?...setting direct and reading
+function we
+remove this blocked queue, right?
 */
 
 #include "uthread.h"
@@ -17,7 +23,7 @@ uthread_ctx_switch error so auto handled sense and we not worry, right?
 #include "private.h"
 #include "queue.h"
 
-queue_t scheduling_queue;
+queue_t ready_queue;
 queue_t zombie_queue;
 struct uthread_tcb* currently_executing_thread;
 
@@ -39,8 +45,8 @@ void uthread_yield(void) {
     /* TODO Phase 2 */
     struct uthread_tcb* current_uthread = uthread_current();
     struct uthread_tcb* next_uthread = NULL;
-    queue_enqueue(scheduling_queue, current_uthread);
-    queue_dequeue(scheduling_queue, (void*)&next_uthread);
+    queue_enqueue(ready_queue, current_uthread);
+    queue_dequeue(ready_queue, (void*)&next_uthread);
     currently_executing_thread = next_uthread;
     uthread_ctx_switch(current_uthread->thread_context,
                        next_uthread->thread_context);
@@ -51,7 +57,7 @@ void uthread_exit(void) {
     struct uthread_tcb* current_uthread = uthread_current();
     struct uthread_tcb* next_uthread = NULL;
     queue_enqueue(zombie_queue, current_uthread);
-    queue_dequeue(scheduling_queue, (void*)&next_uthread);
+    queue_dequeue(ready_queue, (void*)&next_uthread);
     currently_executing_thread = next_uthread;
     uthread_ctx_switch(current_uthread->thread_context,
                        next_uthread->thread_context);
@@ -66,7 +72,7 @@ int uthread_create(uthread_func_t func, void* arg) {
         return -1;
     }
 
-    queue_enqueue(scheduling_queue, (void*)(created_thread));
+    queue_enqueue(ready_queue, (void*)(created_thread));
     created_thread->thread_state = Ready;
     created_thread->thread_stack_top = uthread_ctx_alloc_stack();
     created_thread->thread_context =
@@ -82,8 +88,9 @@ int uthread_create(uthread_func_t func, void* arg) {
 }
 
 int uthread_run(bool preempt, uthread_func_t func, void* arg) {
+    preempt_start(preempt);
     /* TODO Phase 2 */
-    scheduling_queue = queue_create();
+    ready_queue = queue_create();
     zombie_queue = queue_create();
     /* There is no need to initialize currently executing thread because as
      * soon as we perform uthread_run(), we also perform uthread_yield() as
@@ -97,22 +104,37 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
         return -1;
     }
 
-    while (queue_length(scheduling_queue)) {
+    while (queue_length(ready_queue)) {
         uthread_yield();
     }
 
     /*Free the memory for currently active thread*/
     free(currently_executing_thread->thread_context);
+    currently_executing_thread->thread_context = NULL;
     free(currently_executing_thread);
+    currently_executing_thread = NULL;
 
     /*Free memory for the queue objects*/
-    queue_destroy(scheduling_queue);
+    queue_destroy(ready_queue);
     queue_destroy(zombie_queue);
+
+    if (preempt) {
+        preempt_stop();
+    }
     return 0;
 }
 
-void uthread_block(void) { /* TODO Phase 3 */
+void uthread_block(void) {
+    /* TODO Phase 3 */
+    struct uthread_tcb* current_uthread = uthread_current();
+    struct uthread_tcb* next_uthread = NULL;
+    queue_dequeue(ready_queue, (void*)&next_uthread);
+    currently_executing_thread = next_uthread;
+    uthread_ctx_switch(current_uthread->thread_context,
+                       next_uthread->thread_context);
 }
 
-void uthread_unblock(struct uthread_tcb* uthread) { /* TODO Phase 3 */
+void uthread_unblock(struct uthread_tcb* uthread) {
+    /* TODO Phase 3 */
+    queue_enqueue(ready_queue, uthread);
 }
