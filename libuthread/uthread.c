@@ -9,6 +9,9 @@ use global variable inside or function returned?...setting direct and reading
 function we
 remove this blocked queue, right?
 Do we need to store the states?
+Why need zombie queue, can we not just delete things when exit is called?
+Otherwise, need to have parent and state stored, and then delete all children
+in zombie queue with certain parent id?
 */
 
 #include "uthread.h"
