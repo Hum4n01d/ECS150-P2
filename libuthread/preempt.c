@@ -22,13 +22,24 @@ preemption should be enabled. What does this mean?
  */
 #define HZ 100
 
+struct sigaction sa;
+
+void interrupt_handler(int signum) {
+    /* User-defined function*/
+    uthread_yield();
+}
+
 void preempt_disable(void) { /* TODO Phase 4 */
 }
 
 void preempt_enable(void) { /* TODO Phase 4 */
 }
 
-void preempt_start(bool preempt) { /* TODO Phase 4 */
+void preempt_start(bool preempt) {
+    /* TODO Phase 4 */
+    sa = {0};
+    sa.sa_handler = interrupt_handler;
+    sigaction(SIGVTALRM, &sa, NULL);
 }
 
 void preempt_stop(void) { /* TODO Phase 4 */
