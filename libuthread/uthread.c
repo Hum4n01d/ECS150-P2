@@ -34,68 +34,72 @@ struct uthread_tcb* currently_executing_thread;
 enum state { Ready, Running, Blocked, Zombie };
 
 struct uthread_tcb {
-    /* TODO Phase 2 */
     enum state thread_state;
     void* thread_stack_top;
     uthread_ctx_t* thread_context;
 };
 
-struct uthread_tcb* uthread_current(void) {
-    /* TODO Phase 2/3 */
-    return currently_executing_thread;
-}
+struct uthread_tcb* uthread_current(void) return currently_executing_thread;
 
 void uthread_yield(void) {
-    /* TODO Phase 2 */
     struct uthread_tcb* current_uthread = uthread_current();
     struct uthread_tcb* next_uthread = NULL;
+
+    // Place current thread in ready queue to be resumed later
     queue_enqueue(ready_queue, current_uthread);
+
+    // Dequeue next thread to be executed
     queue_dequeue(ready_queue, (void*)&next_uthread);
+
+    // Switch context to next thread
     currently_executing_thread = next_uthread;
     uthread_ctx_switch(current_uthread->thread_context,
                        next_uthread->thread_context);
 }
 
 void uthread_exit(void) {
-    /* TODO Phase 2 */
     struct uthread_tcb* current_uthread = uthread_current();
     struct uthread_tcb* next_uthread = NULL;
+
+    // Place current thread in zombie queue to be deleted later
     queue_enqueue(zombie_queue, current_uthread);
+
+    // Dequeue next thread to be executed
     queue_dequeue(ready_queue, (void*)&next_uthread);
+
+    // Switch context to next thread
     currently_executing_thread = next_uthread;
     uthread_ctx_switch(current_uthread->thread_context,
                        next_uthread->thread_context);
 }
 
 int uthread_create(uthread_func_t func, void* arg) {
-    /* TODO Phase 2 */
-    struct uthread_tcb* created_thread =
+    struct uthread_tcb* thread =
         (struct uthread_tcb*)malloc(sizeof(struct uthread_tcb));
-    /*Memory allocation error*/
-    if (created_thread == NULL) {
-        return -1;
-    }
 
-    queue_enqueue(ready_queue, (void*)(created_thread));
-    created_thread->thread_state = Ready;
-    created_thread->thread_stack_top = uthread_ctx_alloc_stack();
-    created_thread->thread_context =
-        (uthread_ctx_t*)malloc(sizeof(uthread_ctx_t));
-    int context_creation_success =
-        uthread_ctx_init(created_thread->thread_context,
-                         created_thread->thread_stack_top, func, arg);
+    // Handle memory allocation error
+    if (thread == NULL) return -1;
 
-    /*if context creation is successful, uthread creation is successful else if
-     * context creation is not successful, then uthread creation is not
-     * successful*/
-    return context_creation_success;
+    // Add thread to ready queue
+    queue_enqueue(ready_queue, (void*)(thread));
+
+    // Initialize thread
+    thread->thread_state = Ready;
+    thread->thread_stack_top = uthread_ctx_alloc_stack();
+    thread->thread_context = (uthread_ctx_t*)malloc(sizeof(uthread_ctx_t));
+
+    // Context creation status determines thread creation status
+    return uthread_ctx_init(thread->thread_context, thread->thread_stack_top,
+                            func, arg);
 }
 
 int uthread_run(bool preempt, uthread_func_t func, void* arg) {
     preempt_start(preempt);
-    /* TODO Phase 2 */
+
+    // Initialize ready and zombie queues
     ready_queue = queue_create();
     zombie_queue = queue_create();
+
     /* There is no need to initialize currently executing thread because as
      * soon as we perform uthread_run(), we also perform uthread_yield() as
      * queue_length is more than or equal to 1 everytime*/
@@ -103,10 +107,8 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
         (struct uthread_tcb*)malloc(sizeof(struct uthread_tcb));
     currently_executing_thread->thread_context =
         (uthread_ctx_t*)malloc(sizeof(uthread_ctx_t));
-    int initial_thread_success = uthread_create(func, arg);
-    if (initial_thread_success == -1) {
-        return -1;
-    }
+
+    if (uthread_create(func, arg) == -1) return -1;
 
     while (queue_length(ready_queue)) {
         uthread_yield();
@@ -129,16 +131,27 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
 }
 
 void uthread_block(void) {
-    /* TODO Phase 3 */
     struct uthread_tcb* current_uthread = uthread_current();
     struct uthread_tcb* next_uthread = NULL;
+
+    // Place current thread in blocked state
+    // TODO: Check this is needed
+    current_uthread->thread_state = Blocked;
+
+    // Dequeue next thread to be executed
     queue_dequeue(ready_queue, (void*)&next_uthread);
+
+    // Switch context to next thread
     currently_executing_thread = next_uthread;
     uthread_ctx_switch(current_uthread->thread_context,
                        next_uthread->thread_context);
 }
 
 void uthread_unblock(struct uthread_tcb* uthread) {
-    /* TODO Phase 3 */
+    // Update thread state
+    // TODO: Check this is needed
+    uthread->thread_state = Ready;
+
+    // Place thread back in ready queue
     queue_enqueue(ready_queue, uthread);
 }
