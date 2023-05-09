@@ -93,6 +93,20 @@ int uthread_create(uthread_func_t func, void* arg) {
                             func, arg);
 }
 
+void uthread_destroy(queue_t queue, struct uthread_tcb* thread) {
+    // Use queue to avoid unused parameter warning
+    (void)queue;
+
+    free(thread->thread_context);
+    thread->thread_context = NULL;
+
+    uthread_ctx_destroy_stack(thread->thread_stack_top);
+    thread->thread_stack_top = NULL;
+
+    free(thread);
+    thread = NULL;
+}
+
 int uthread_run(bool preempt, uthread_func_t func, void* arg) {
     preempt_start(preempt);
 
@@ -108,13 +122,18 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
     currently_executing_thread->thread_context =
         (uthread_ctx_t*)malloc(sizeof(uthread_ctx_t));
 
+    // Handle unsuccessful thread creation
     if (uthread_create(func, arg) == -1) return -1;
 
+    // Main loop, runs until all threads have exited
     while (queue_length(ready_queue)) {
         uthread_yield();
+
+        // Destroy all threads in zombie queue
+        queue_iterate(zombie_queue, (queue_func_t)uthread_destroy);
     }
 
-    /*Free the memory for currently active thread*/
+    // Free the memory for currently active thread
     free(currently_executing_thread->thread_context);
     currently_executing_thread->thread_context = NULL;
     free(currently_executing_thread);

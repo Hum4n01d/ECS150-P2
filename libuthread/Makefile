@@ -1,11 +1,11 @@
 # Target library
-lib := libuthread.a
+lib 		:= libuthread.a
 objs    := queue.o uthread.o context.o preempt.o sem.o
 
 # removed -Werror for now
 
-CC	:= gcc
-CFLAGS  := -Wall -Wextra  -MMD
+CC			:= gcc
+CFLAGS  := -Wall -Wextra -MMD -g
 
 all: $(lib)
 
