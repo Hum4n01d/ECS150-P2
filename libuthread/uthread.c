@@ -39,7 +39,7 @@ struct uthread_tcb {
     uthread_ctx_t* thread_context;
 };
 
-struct uthread_tcb* uthread_current(void) return currently_executing_thread;
+struct uthread_tcb* uthread_current(void) { return currently_executing_thread; }
 
 void uthread_yield(void) {
     struct uthread_tcb* current_uthread = uthread_current();

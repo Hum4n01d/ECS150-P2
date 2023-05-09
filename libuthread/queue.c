@@ -164,6 +164,4 @@ void queue_print(queue_t queue) {
         // If current node is deleted, next is already set to avoid segfault
         current_node = next_node;
     }
-
-    return 0;
 }

@@ -28,6 +28,8 @@ bool global_preempt = false;
 void interrupt_handler(int signum) {
     // Yield to next thread
     uthread_yield();
+
+    printf("interrupt_handler signum: %d\n", signum);
 }
 
 void preempt_start(bool preempt) {
@@ -36,8 +38,7 @@ void preempt_start(bool preempt) {
 
     if (!global_preempt) return;
 
-    // Set up signal handler
-    sa = {0};
+    // Set up SIGVTALRM signal handler
     sa.sa_handler = interrupt_handler;
     sigaction(SIGVTALRM, &sa, NULL);
 
@@ -73,12 +74,6 @@ void preempt_stop(void) {
     // TODO: Restore previous action associated to virtual alarm signals
 }
 
-/*
-The two other functions that you must implement are meant to enable or disable
-preemption. For that, you will need to be able to block or unblock signals of
-type SIGVTALRM.
-*/
-
 void preempt_enable(void) {
     if (!global_preempt) return;
 
@@ -92,7 +87,6 @@ void preempt_enable(void) {
 
     // Unblock SIGVTALRM
     sigprocmask(SIG_UNBLOCK, &sigset, NULL);
-    /
 }
 
 void preempt_disable(void) {
