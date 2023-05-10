@@ -2,13 +2,9 @@
 Memory see
 All errors see
 uthread_ctx_switch error so auto handled sense and we not worry, right?
-context deletion and allocation mem see
-zombie delete where see
-where do we use iterate()?
 use global variable inside or function returned?...setting direct and reading
 function we
 remove this blocked queue, right?
-Do we need to store the states?
 Why need zombie queue, can we not just delete things when exit is called?
 Otherwise, need to have parent and state stored, and then delete all children
 in zombie queue with certain parent id?
@@ -30,8 +26,6 @@ in zombie queue with certain parent id?
 queue_t ready_queue;
 queue_t zombie_queue;
 struct uthread_tcb* currently_executing_thread;
-
-enum state { Ready, Running, Blocked, Zombie };
 
 struct uthread_tcb {
     void* thread_stack_top;
