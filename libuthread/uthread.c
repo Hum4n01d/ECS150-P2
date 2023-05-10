@@ -34,7 +34,6 @@ struct uthread_tcb* currently_executing_thread;
 enum state { Ready, Running, Blocked, Zombie };
 
 struct uthread_tcb {
-    enum state thread_state;
     void* thread_stack_top;
     uthread_ctx_t* thread_context;
 };
@@ -84,7 +83,6 @@ int uthread_create(uthread_func_t func, void* arg) {
     queue_enqueue(ready_queue, (void*)(thread));
 
     // Initialize thread
-    thread->thread_state = Ready;
     thread->thread_stack_top = uthread_ctx_alloc_stack();
     thread->thread_context = (uthread_ctx_t*)malloc(sizeof(uthread_ctx_t));
 
@@ -153,10 +151,6 @@ void uthread_block(void) {
     struct uthread_tcb* current_uthread = uthread_current();
     struct uthread_tcb* next_uthread = NULL;
 
-    // Place current thread in blocked state
-    // TODO: Check this is needed
-    current_uthread->thread_state = Blocked;
-
     // Dequeue next thread to be executed
     queue_dequeue(ready_queue, (void*)&next_uthread);
 
@@ -167,10 +161,6 @@ void uthread_block(void) {
 }
 
 void uthread_unblock(struct uthread_tcb* uthread) {
-    // Update thread state
-    // TODO: Check this is needed
-    uthread->thread_state = Ready;
-
     // Place thread back in ready queue
     queue_enqueue(ready_queue, uthread);
 }
