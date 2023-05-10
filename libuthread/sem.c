@@ -36,15 +36,7 @@ int sem_destroy(sem_t sem) {
     if ((sem == NULL) || (queue_length(sem->sem_waiting_queue) != 0)) return -1;
 
     // Free semaphore waiting queue
-    // TODO: Confirm that this works
-    struct uthread_tcb* next_uthread = NULL;
-
-    while (queue_length(sem->sem_waiting_queue) != 0) {
-        queue_dequeue(sem->sem_waiting_queue, (void**)&next_uthread);
-        free(next_uthread);
-    }
-
-    // Destroy semaphore waiting queue data structure (Does not free elements)
+    queue_iterate(sem->sem_waiting_queue, free);
     queue_destroy(sem->sem_waiting_queue);
 
     // Free semaphore
@@ -67,7 +59,6 @@ int sem_down(sem_t sem) {
         queue_enqueue(sem->sem_waiting_queue, current_uthread);
 
         // Switch context to next thread
-        // TODO: Confirm this is correct
         uthread_block();
     }
 
