@@ -1,9 +1,20 @@
 /*
+
+Asking Questions:
 Memory see
 All errors see
+sem_prime.c error
+preempt test case OK? and how about sleep/print issues?
+preempt disable and enable where in uthread.c and sem.c
+Report what all write?
+Queue test cases 20?
 uthread_ctx_switch error so auto handled sense and we not worry, right?
 use global variable inside or function returned?...setting direct and reading
 function we
+
+Error do we if sem_up and down not properly sense as waiting queue possible stuff remains?
+Starvation ideation help please
+
 remove this blocked queue, right?
 Why need zombie queue, can we not just delete things when exit is called?
 Otherwise, need to have parent and state stored, and then delete all children
