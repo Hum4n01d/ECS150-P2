@@ -17,9 +17,6 @@ each thread able to change it.
 #include <sys/time.h>
 #include <unistd.h>
 
-// #include "private.h"
-// #include "uthread.h"
-
 /*
  * Frequency of preemption
  * 100Hz is 100 times per second
@@ -27,24 +24,15 @@ each thread able to change it.
 #define HZ 100
 
 struct sigaction sa;
+struct itimerval old_timer;
 
 bool global_preempt = false;
-
-#define NUM_ITERATIONS 1000
-
-int counter1 = 0;
-int counter2 = 0;
-int counter3 = 0;
 
 void interrupt_handler(int signum) {
     printf("interrupt_handler signum: %d\n", signum);
 
     // Yield to next thread
-    printf("===Thread 1 ran %d times\n", counter1);
-    printf("Thread 2 ran %d times\n", counter2);
-    printf("Thread 3 ran %d times===\n", counter3);
-
-    exit(0);
+    uthread_yield();
 }
 
 void preempt_start(bool preempt) {
@@ -66,9 +54,7 @@ void preempt_start(bool preempt) {
     timer.it_interval.tv_sec = 0;
     timer.it_interval.tv_usec = 10000;
 
-    int val = setitimer(ITIMER_VIRTUAL, &timer, NULL);
-
-    printf("return: %d\n", val);
+    setitimer(ITIMER_VIRTUAL, &timer, &old_timer);
 }
 
 void preempt_stop(void) {
@@ -82,12 +68,13 @@ void preempt_stop(void) {
     sigaction(SIGVTALRM, &sa, NULL);
 
     // Restore previous timer configuration
-    struct itimerval timer;
-    setitimer(ITIMER_VIRTUAL, &timer, NULL);
+    setitimer(ITIMER_VIRTUAL, &old_timer, NULL);
 }
 
 void preempt_enable(void) {
     if (!global_preempt) return;
+
+    printf("PREEMPTION ENABLED\n");
 
     sigset_t sigset;
 
@@ -104,6 +91,8 @@ void preempt_enable(void) {
 void preempt_disable(void) {
     if (!global_preempt) return;
 
+    printf("PREEMPTION DISABLED\n");
+
     sigset_t sigset;
 
     // Initialize signal set
@@ -114,80 +103,4 @@ void preempt_disable(void) {
 
     // Block SIGVTALRM
     sigprocmask(SIG_BLOCK, &sigset, NULL);
-}
-
-static void thread2(void *arg) {
-    (void)arg;
-
-    while (counter2 < 1000000000) {
-        counter2++;
-
-        // No yield
-    }
-}
-
-static void thread1(void *arg) {
-    (void)arg;
-
-    int i;
-    for (i = 0; i < 10; i++) {
-        counter1++;
-    }
-}
-
-static void thread3(void *arg) {
-    (void)arg;
-
-    int i;
-    while (true) {
-        counter3++;
-    }
-}
-
-int main(int argc, char *argv[]) {
-    preempt_start(true);
-
-    preempt_enable();
-
-    printf("===Thread 1 ran %d times\n", counter1);
-    printf("Thread 2 ran %d times\n", counter2);
-    printf("Thread 3 ran %d times===\n", counter3);
-
-    thread1(NULL);
-
-    printf("===Thread 1 ran %d times\n", counter1);
-    printf("Thread 2 ran %d times\n", counter2);
-    printf("Thread 3 ran %d times===\n", counter3);
-
-    thread2(NULL);
-
-    printf("===Thread 1 ran %d times\n", counter1);
-    printf("Thread 2 ran %d times\n", counter2);
-    printf("Thread 3 ran %d times===\n", counter3);
-
-    preempt_disable();
-
-    thread3(NULL);
-
-    printf("===Thread 1 ran %d times\n", counter1);
-    printf("Thread 2 ran %d times\n", counter2);
-    printf("Thread 3 ran %d times===\n", counter3);
-
-    // Wait 3 seconds
-    sleep(3);
-
-    // Re-enable preemption
-    preempt_enable();
-
-    printf("===Thread 1 ran %d times\n", counter1);
-    printf("Thread 2 ran %d times\n", counter2);
-    printf("Thread 3 ran %d times===\n", counter3);
-
-    preempt_stop();
-
-    printf("===Thread 1 ran %d times\n", counter1);
-    printf("Thread 2 ran %d times\n", counter2);
-    printf("Thread 3 ran %d times===\n", counter3);
-
-    return 0;
 }

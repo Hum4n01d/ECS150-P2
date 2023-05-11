@@ -10,6 +10,7 @@ programs := \
 	sem_corner_own_implementation.x \
 	sem_corner_external_implementation.x \
 	sem_corner_external_implementation2.x \
+	preempt_test.x \
 # User-level thread library
 UTHREADLIB := libuthread
 UTHREADPATH := ../$(UTHREADLIB)
