@@ -61,6 +61,7 @@ void preempt_start(bool preempt) {
     timer.it_interval.tv_sec = 0;
     timer.it_interval.tv_usec = HZ * MICROSECOND_CONVERSION;
 
+    // Store previous timer configuration  
     setitimer(ITIMER_VIRTUAL, &timer, &old_timer);
 }
 

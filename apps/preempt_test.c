@@ -38,6 +38,8 @@ void thread_func2(void *arg) {
 
 void dummy_handler(int signum) {
     (void)signum;
+
+    printf("Dummy handler reached\n");  
 }
 
 int main(void) {
@@ -49,12 +51,12 @@ int main(void) {
     sigaction(SIGVTALRM, &sa, NULL);
 
     // Create dummy timer
-    struct itimerval timer;
-    timer.it_value.tv_sec = 0;
-    timer.it_value.tv_usec = 0;
-    timer.it_interval.tv_sec = 0;
-    timer.it_interval.tv_usec = 0;
-    setitimer(ITIMER_VIRTUAL, &timer, NULL);
+    struct itimerval dummy_timer;
+    dummy_timer.it_value.tv_sec = 0;
+    dummy_timer.it_value.tv_usec = 0;
+    dummy_timer.it_interval.tv_sec = 0;
+    dummy_timer.it_interval.tv_usec = 0;
+    setitimer(ITIMER_VIRTUAL, &dummy_timer, NULL);
 
     // Run thread_func2
     uthread_run(true, thread_func2, NULL);
@@ -69,12 +71,15 @@ int main(void) {
 
     // Verify that placeholder timer was restored
     struct itimerval old_timer;
-    setitimer(ITIMER_VIRTUAL, NULL, &old_timer);
-    if (old_timer.it_value.tv_sec != 0 || old_timer.it_value.tv_usec != 0 ||
-        old_timer.it_interval.tv_sec != 0 || old_timer.it_interval.tv_usec != 0) {
-        printf("ERROR: timer was not restored\n");
+    getitimer(ITIMER_VIRTUAL, &old_timer);
+
+    if (old_timer.it_value.tv_sec != 0 || old_timer.it_value.tv_usec != 0 || old_timer.it_interval.tv_sec != 0 || old_timer.it_interval.tv_usec != 0) {
+        printf("ERROR: Timer was not restored\n");
         exit(EXIT_FAILURE);
     }
+
+    // Trigger SIGVTALRM to test dummy_handler
+    raise(SIGVTALRM); 
 
     printf("Test complete.\n");
 
