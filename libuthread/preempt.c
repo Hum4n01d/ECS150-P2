@@ -16,6 +16,7 @@ each thread able to change it.
 #include <stdlib.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include "private.h"
 
 /*
  * Frequency of preemption
