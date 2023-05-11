@@ -143,24 +143,3 @@ int queue_length(queue_t queue) {
 
     return queue->length;
 }
-
-void queue_print(queue_t queue) {
-    if (queue == NULL) {
-        printf("Empty Queue\n");
-    }
-
-    if (queue_length(queue) == 0) {
-        printf("Empty Queue 0 length\n");
-    }
-
-    struct node *current_node = queue->head;
-    struct node *next_node = NULL;
-
-    while (current_node != NULL) {
-        next_node = current_node->next;
-        printf("My data is %p\n", current_node->data);
-
-        // If current node is deleted, next is already set to avoid segfault
-        current_node = next_node;
-    }
-}
