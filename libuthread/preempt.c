@@ -29,7 +29,7 @@ struct itimerval old_timer;
 bool global_preempt = false;
 
 void interrupt_handler(int signum) {
-    printf("interrupt_handler signum: %d\n", signum);
+    (void)signum;
 
     // Yield to next thread
     uthread_yield();
@@ -74,7 +74,7 @@ void preempt_stop(void) {
 void preempt_enable(void) {
     if (!global_preempt) return;
 
-    printf("PREEMPTION ENABLED\n");
+    // printf("PREEMPTION ENABLED\n");
 
     sigset_t sigset;
 

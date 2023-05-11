@@ -104,8 +104,6 @@ void uthread_destroy(queue_t queue, struct uthread_tcb* thread) {
 }
 
 int uthread_run(bool preempt, uthread_func_t func, void* arg) {
-    preempt_start(preempt);
-
     // Initialize ready and zombie queues
     ready_queue = queue_create();
     zombie_queue = queue_create();
@@ -120,6 +118,9 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
 
     // Handle unsuccessful thread creation
     if (uthread_create(func, arg) == -1) return -1;
+
+    // Start preemption
+    preempt_start(preempt);
 
     // Main loop, runs until all threads have exited
     while (queue_length(ready_queue)) {

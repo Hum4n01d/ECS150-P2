@@ -1,73 +1,39 @@
-#include <signal.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
-#include <unistd.h>
 #include <uthread.h>
 
-#define NUM_ITERATIONS 1000
-
-int counter1 = 0;
-int counter2 = 0;
-int counter3 = 0;
-
-static void thread3(void *arg) {
-    (void)arg;
-
-    printf("thread3 start\n");
-
-    while (true) {
-        counter3++;
-
-        // no yield
+void busy_loop(void) {
+    intmax_t i = 0;
+    while (i < 10000000000) {
+        i++;
     }
-
-    printf("thread3 end\n");
 }
 
-static void thread2(void *arg) {
+void thread_func2(void *arg) {
     (void)arg;
 
-    printf("thread2 start\n");
-
-    uthread_create(thread3, NULL);
-
-    while (counter2 < 10) {
-        counter2++;
-
-        printf("thread2 counter2: %d\n", counter2);
-
-        // No yield
-    }
-
-    printf("thread2 end\n");
+    printf("Thread 2 starting...\n");
+    busy_loop();
+    printf("Thread 2 done.\n");
 }
 
-static void thread1(void *arg) {
+void thread_func1(void *arg) {
     (void)arg;
 
-    printf("thread1 start\n");
+    uthread_create(thread_func2, NULL);
 
-    uthread_create(thread2, NULL);
-
-    int i;
-    for (i = 0; i < 10; i++) {
-        counter1++;
-
-        printf("thread1 counter1: %d\n", counter1);
-
-        // Yield to next thread
+    printf("Thread 1 starting...\n");
+    for (int i = 0; i < 5; i++) {
+        printf("Thread 1 running...\n");
         uthread_yield();
     }
-
-    printf("thread1 end\n");
+    printf("Thread 1 done.\n");
 }
 
 int main(void) {
-    uthread_run(true, thread1, NULL);
+    uthread_run(true, thread_func1, NULL);
+
+    printf("Test complete.\n");
 
     return 0;
 }
