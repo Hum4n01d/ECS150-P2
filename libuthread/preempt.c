@@ -24,6 +24,7 @@ each thread able to change it.
  * 100Hz is 100 times per second
  */
 #define HZ 100
+#define MICROSECOND_CONVERSION 100
 
 struct sigaction sa;
 struct itimerval old_timer;
@@ -52,9 +53,9 @@ void preempt_start(bool preempt) {
     // Configure timer to expire every 10 ms (100 times per second)
     struct itimerval timer;
     timer.it_value.tv_sec = 0;
-    timer.it_value.tv_usec = 10000;
+    timer.it_value.tv_usec = HZ * MICROSECOND_CONVERSION;
     timer.it_interval.tv_sec = 0;
-    timer.it_interval.tv_usec = 10000;
+    timer.it_interval.tv_usec = HZ * MICROSECOND_CONVERSION;
 
     setitimer(ITIMER_VIRTUAL, &timer, &old_timer);
 }
