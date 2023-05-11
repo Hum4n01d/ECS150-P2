@@ -4,6 +4,8 @@ Asking Questions:
 Memory see for own test cases
 Can't think of better ones....old action part so signal do we??
 
+not requested so skip preemption!!
+
 no need global?
 block or setmask?
 
@@ -57,6 +59,7 @@ void uthread_yield(void) {
     struct uthread_tcb* next_uthread = NULL;
 
     // Place current thread in ready queue to be resumed later
+    preempt_disable();
     queue_enqueue(ready_queue, current_uthread);
 
     // Dequeue next thread to be executed
@@ -66,6 +69,7 @@ void uthread_yield(void) {
     currently_executing_thread = next_uthread;
     uthread_ctx_switch(current_uthread->thread_context,
                        next_uthread->thread_context);
+    preempt_enable();
 }
 
 void uthread_exit(void) {
@@ -73,6 +77,7 @@ void uthread_exit(void) {
     struct uthread_tcb* next_uthread = NULL;
 
     // Place current thread in zombie queue to be deleted later
+    preempt_disable();
     queue_enqueue(zombie_queue, current_uthread);
 
     // Dequeue next thread to be executed
@@ -82,6 +87,7 @@ void uthread_exit(void) {
     currently_executing_thread = next_uthread;
     uthread_ctx_switch(current_uthread->thread_context,
                        next_uthread->thread_context);
+    preempt_enable();
 }
 
 int uthread_create(uthread_func_t func, void* arg) {
@@ -92,7 +98,9 @@ int uthread_create(uthread_func_t func, void* arg) {
     if (thread == NULL) return -1;
 
     // Add thread to ready queue
+    preempt_disable();
     queue_enqueue(ready_queue, (void*)(thread));
+    preempt_enable();
 
     // Initialize thread
     thread->thread_stack_top = uthread_ctx_alloc_stack();
@@ -175,9 +183,8 @@ void uthread_block(void) {
     struct uthread_tcb* next_uthread = NULL;
 
     // Dequeue next thread to be executed
-    preempt_disable();
+    // already called with preemption disabled
     queue_dequeue(ready_queue, (void*)&next_uthread);
-    preempt_enable();
 
     // Switch context to next thread
     currently_executing_thread = next_uthread;
@@ -187,7 +194,6 @@ void uthread_block(void) {
 
 void uthread_unblock(struct uthread_tcb* uthread) {
     // Place thread back in ready queue
-    preempt_disable();
+    // already called with preemption disabled
     queue_enqueue(ready_queue, uthread);
-    preempt_enable();
 }
