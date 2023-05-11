@@ -1,27 +1,30 @@
 /*
 
 Asking Questions:
-Memory see
-All errors see
-sem_prime.c error
-preempt test case OK? and how about sleep/print issues?
-preempt disable and enable where in uthread.c and sem.c
-Report what all write?
-Queue test cases 20?
+Memory see for own test cases
+Can't think of better ones....old action part so signal do we??
+
+no need global?
+block or setmask?
+
+
+Warning for ours
 uthread_ctx_switch error so auto handled sense and we not worry, right?
 use global variable inside or function returned?...setting direct and reading
-function we
-MakeFile ok?
-No need delete again?
-warnings?
+preempt disable and enable where in uthread.c and sem.c
+All errors see do
+waiting queue delete if destroy before?
+
+
+preempt test case OK? and how about sleep/print issues?
+
+Report what all write?
+Queue test cases 20?
+
+MakeFile ok?m
 
 Error do we if sem_up and down not properly sense as waiting queue possible
 stuff remains? Starvation ideation help please
-
-remove this blocked queue, right?
-Why need zombie queue, can we not just delete things when exit is called?
-Otherwise, need to have parent and state stored, and then delete all children
-in zombie queue with certain parent id?
 
 */
 
@@ -155,7 +158,8 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
     queue_iterate(ready_queue, (queue_func_t)queue_delete);
     queue_destroy(ready_queue);
 
-    // better practice to do it, even though programs should end with idle_thread
+    // better practice to do it, even though programs should end with
+    // idle_thread
     queue_iterate(zombie_queue, (queue_func_t)uthread_destroy);
     queue_iterate(zombie_queue, (queue_func_t)queue_delete);
     queue_destroy(zombie_queue);
@@ -171,7 +175,9 @@ void uthread_block(void) {
     struct uthread_tcb* next_uthread = NULL;
 
     // Dequeue next thread to be executed
+    preempt_disable();
     queue_dequeue(ready_queue, (void*)&next_uthread);
+    preempt_enable();
 
     // Switch context to next thread
     currently_executing_thread = next_uthread;
@@ -181,5 +187,7 @@ void uthread_block(void) {
 
 void uthread_unblock(struct uthread_tcb* uthread) {
     // Place thread back in ready queue
+    preempt_disable();
     queue_enqueue(ready_queue, uthread);
+    preempt_enable();
 }
