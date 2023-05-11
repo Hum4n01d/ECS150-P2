@@ -14,14 +14,22 @@
         }                                   \
     } while (0)
 
-/* Create */
+
 void test_create(void) {
     fprintf(stderr, "*** TEST create ***\n");
 
     TEST_ASSERT(queue_create() != NULL);
 }
 
-/* Enqueue/Dequeue simple */
+void test_destroy(void) {
+    fprintf(stderr, "*** TEST destroy ***\n");
+
+    queue_t q = queue_create();
+    TEST_ASSERT(q != NULL);
+
+    TEST_ASSERT(queue_destroy(q) == 0);
+}
+
 void test_queue_simple(void) {
     int data = 3, *ptr;
     queue_t q;
@@ -63,10 +71,41 @@ void test_iterator(void) {
     TEST_ASSERT(queue_length(q) == 9);
 }
 
+void test_delete(void) {
+    queue_t q;
+    int data[] = {1, 2, 3, 4, 5, 42, 6, 7, 8, 9};
+    size_t i;
+
+    fprintf(stderr, "*** TEST queue_delete ***\n");
+
+    /* Initialize the queue and enqueue items */
+    q = queue_create();
+    for (i = 0; i < sizeof(data) / sizeof(data[0]); i++)
+        queue_enqueue(q, &data[i]);
+
+    /* Test deleting a node in the queue */
+    TEST_ASSERT(queue_delete(q, &data[5]) == 0);
+}
+
+void test_delete_null(void) {
+    queue_t q;
+    int data = 1;
+
+    fprintf(stderr, "*** TEST queue_delete_null ***\n");
+
+    /* Initialize the queue and enqueue items */
+    q = queue_create();
+    
+    /* Test deleting a node that isn't in the queue */
+    TEST_ASSERT(queue_delete(q, &data) == -1);
+}
+
 int main(void) {
     test_create();
     test_queue_simple();
     test_iterator();
+    test_delete();
+    test_delete_null();
 
     return 0;
 }
