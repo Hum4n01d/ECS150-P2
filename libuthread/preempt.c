@@ -26,8 +26,9 @@ each thread able to change it.
 #define HZ 100
 #define MICROSECOND_CONVERSION 100
 
-struct sigaction sa;
-struct itimerval old_timer;
+struct sigaction sa, old_sa;
+struct itimerval timer, old_timer;
+sigset_t block_signal_set;
 
 bool global_preempt = false;
 
@@ -44,14 +45,17 @@ void preempt_start(bool preempt) {
 
     if (!global_preempt) return;
 
+    // Initialize block signal set
+    sigemptyset(&block_signal_set);
+    sigaddset(&block_signal_set, SIGVTALRM);
+
     // Set up SIGVTALRM signal handler
     sa.sa_handler = interrupt_handler;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
-    sigaction(SIGVTALRM, &sa, NULL);
+    sigaction(SIGVTALRM, &sa, &old_sa);
 
     // Configure timer to expire every 10 ms (100 times per second)
-    struct itimerval timer;
     timer.it_value.tv_sec = 0;
     timer.it_value.tv_usec = HZ * MICROSECOND_CONVERSION;
     timer.it_interval.tv_sec = 0;
@@ -63,12 +67,10 @@ void preempt_start(bool preempt) {
 void preempt_stop(void) {
     if (!global_preempt) return;
 
+    printf("PREEMPTION STOPPED\n");
+
     // Restore previous action associated to virtual alarm signals
-    struct sigaction sa;
-    sa.sa_handler = SIG_DFL;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    sigaction(SIGVTALRM, &sa, NULL);
+    sigaction(SIGVTALRM, &old_sa, NULL);
 
     // Restore previous timer configuration
     setitimer(ITIMER_VIRTUAL, &old_timer, NULL);
@@ -77,33 +79,13 @@ void preempt_stop(void) {
 void preempt_enable(void) {
     if (!global_preempt) return;
 
-    // printf("PREEMPTION ENABLED\n");
-
-    sigset_t sigset;
-
-    // Initialize signal set
-    sigemptyset(&sigset);
-
-    // Add SIGVTALRM to signal set
-    sigaddset(&sigset, SIGVTALRM);
-
     // Unblock SIGVTALRM
-    sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+    sigprocmask(SIG_UNBLOCK, &block_signal_set, NULL);
 }
 
 void preempt_disable(void) {
     if (!global_preempt) return;
 
-    printf("PREEMPTION DISABLED\n");
-
-    sigset_t sigset;
-
-    // Initialize signal set
-    sigemptyset(&sigset);
-
-    // Add SIGVTALRM to signal set
-    sigaddset(&sigset, SIGVTALRM);
-
     // Block SIGVTALRM
-    sigprocmask(SIG_BLOCK, &sigset, NULL);
+    sigprocmask(SIG_BLOCK, &block_signal_set, NULL);
 }
