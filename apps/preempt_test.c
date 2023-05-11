@@ -7,15 +7,14 @@ void busy_loop(void) {
     while (i < 1000000000) {
         i++;
 
-        if (i % 100000000 == 0) {
-            printf("Busy loop %d\n", i / 100000000);
+        if (i % 10000000 == 0) {
+            printf("Busy loop %d\n", i);
         }
     }
 }
 
 void thread_func1(void *arg) {
     (void)arg;
-
 
     printf("Thread 1 starting...\n");
     for (int i = 0; i < 5; i++) {

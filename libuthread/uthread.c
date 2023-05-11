@@ -11,9 +11,12 @@ Queue test cases 20?
 uthread_ctx_switch error so auto handled sense and we not worry, right?
 use global variable inside or function returned?...setting direct and reading
 function we
+MakeFile ok?
+No need delete again?
+warnings?
 
-Error do we if sem_up and down not properly sense as waiting queue possible stuff remains?
-Starvation ideation help please
+Error do we if sem_up and down not properly sense as waiting queue possible
+stuff remains? Starvation ideation help please
 
 remove this blocked queue, right?
 Why need zombie queue, can we not just delete things when exit is called?
@@ -104,14 +107,15 @@ void uthread_destroy(queue_t queue, struct uthread_tcb* thread) {
         return;
     }
 
-    free(thread->thread_context);
-    thread->thread_context = NULL;
-
+    // undefined behaviour pointers to free memory
+    queue_delete(queue, thread);
     uthread_ctx_destroy_stack(thread->thread_stack_top);
     thread->thread_stack_top = NULL;
 
+    free(thread->thread_context);
+    thread->thread_context = NULL;
+
     free(thread);
-    thread = NULL;
 }
 
 int uthread_run(bool preempt, uthread_func_t func, void* arg) {
@@ -138,7 +142,6 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
         uthread_yield();
         // Destroy all threads in zombie queue
         queue_iterate(zombie_queue, (queue_func_t)uthread_destroy);
-        queue_iterate(zombie_queue, (queue_func_t)queue_delete);
     }
 
     // Free the memory for currently active thread
@@ -148,9 +151,11 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
     currently_executing_thread = NULL;
 
     /*Free memory for the queue objects*/
-    queue_iterate(zombie_queue, (queue_func_t)uthread_destroy);
-    queue_iterate(zombie_queue, (queue_func_t)queue_delete);
+    queue_iterate(ready_queue, (queue_func_t)uthread_destroy);
+    queue_iterate(ready_queue, (queue_func_t)queue_delete);
     queue_destroy(ready_queue);
+
+    // better practice to do it, even though programs should end with idle_thread
     queue_iterate(zombie_queue, (queue_func_t)uthread_destroy);
     queue_iterate(zombie_queue, (queue_func_t)queue_delete);
     queue_destroy(zombie_queue);

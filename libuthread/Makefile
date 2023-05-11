@@ -1,4 +1,4 @@
-# Target library
+# Target library...variable quiet, turn on and off debug
 lib 		:= libuthread.a
 objs    := queue.o uthread.o context.o preempt.o sem.o
 
