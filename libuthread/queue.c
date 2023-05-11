@@ -1,4 +1,3 @@
-/* Remove queue print */
 #include "queue.h"
 
 #include <assert.h>
@@ -14,6 +13,7 @@ struct node {
 
 struct queue {
     struct node *head;
+    struct node *tail;
     int length;
 };
 
@@ -24,6 +24,7 @@ queue_t queue_create(void) {
     if (q == NULL) return NULL;
 
     q->head = NULL;
+    q->tail = NULL;
     q->length = 0;
 
     return q;
@@ -52,6 +53,10 @@ int queue_enqueue(queue_t queue, void *data) {
 
     if (queue->length == 0) {
         queue->head = new_node;
+        queue->tail = new_node;
+    } else {
+        queue->tail->next = new_node;
+        queue->tail = new_node;
     }
 
     queue->length++;
@@ -93,6 +98,11 @@ int queue_delete(queue_t queue, void *data) {
             } else {
                 // Not head, update previous node to point at next node
                 previous_node->next = current_node->next;
+            }
+
+            // Update tail if current node is tail
+            if (current_node == queue->tail) {
+                queue->tail = previous_node;
             }
 
             queue->length--;
