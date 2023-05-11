@@ -8,7 +8,8 @@ programs := \
 	sem_buffer.x \
 	sem_count.x \
 	sem_corner_own_implementation.x \
-	preempt_simple.x \
+	sem_corner_external_implementation.x \
+	sem_corner_external_implementation2.x \
 # User-level thread library
 UTHREADLIB := libuthread
 UTHREADPATH := ../$(UTHREADLIB)

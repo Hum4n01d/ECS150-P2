@@ -8,6 +8,7 @@ remove this blocked queue, right?
 Why need zombie queue, can we not just delete things when exit is called?
 Otherwise, need to have parent and state stored, and then delete all children
 in zombie queue with certain parent id?
+
 */
 
 #include "uthread.h"
@@ -88,6 +89,9 @@ int uthread_create(uthread_func_t func, void* arg) {
 void uthread_destroy(queue_t queue, struct uthread_tcb* thread) {
     // Use queue to avoid unused parameter warning
     (void)queue;
+    if (!thread) {
+        return;
+    }
 
     free(thread->thread_context);
     thread->thread_context = NULL;
@@ -120,9 +124,9 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
     // Main loop, runs until all threads have exited
     while (queue_length(ready_queue)) {
         uthread_yield();
-
         // Destroy all threads in zombie queue
         queue_iterate(zombie_queue, (queue_func_t)uthread_destroy);
+        queue_iterate(zombie_queue, (queue_func_t)queue_delete);
     }
 
     // Free the memory for currently active thread
@@ -132,7 +136,11 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
     currently_executing_thread = NULL;
 
     /*Free memory for the queue objects*/
+    queue_iterate(zombie_queue, (queue_func_t)uthread_destroy);
+    queue_iterate(zombie_queue, (queue_func_t)queue_delete);
     queue_destroy(ready_queue);
+    queue_iterate(zombie_queue, (queue_func_t)uthread_destroy);
+    queue_iterate(zombie_queue, (queue_func_t)queue_delete);
     queue_destroy(zombie_queue);
 
     if (preempt) {

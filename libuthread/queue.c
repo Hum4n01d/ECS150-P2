@@ -135,7 +135,6 @@ int queue_iterate(queue_t queue, queue_func_t func) {
         // If current node is deleted, next is already set to avoid segfault
         current_node = next_node;
     }
-
     return 0;
 }
 

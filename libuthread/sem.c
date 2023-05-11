@@ -35,8 +35,7 @@ int sem_destroy(sem_t sem) {
     // Sem is NULL or it still has threads waiting on it.
     if ((sem == NULL) || (queue_length(sem->sem_waiting_queue) != 0)) return -1;
 
-    // Free semaphore waiting queue
-    queue_iterate(sem->sem_waiting_queue, free);
+    // No need to free semaphore waiting queue as length is supposed to be 0
     queue_destroy(sem->sem_waiting_queue);
 
     // Free semaphore
