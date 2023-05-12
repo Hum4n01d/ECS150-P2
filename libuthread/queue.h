@@ -10,7 +10,7 @@
  *
  * Apart from delete and iterate operations, all operations should be O(1).
  */
-typedef struct queue *queue_t;
+typedef struct queue* queue_t;
 
 /*
  * queue_create - Allocate an empty queue
@@ -106,7 +106,5 @@ int queue_iterate(queue_t queue, queue_func_t func);
  * Return: -1 if @queue is NULL. Length of @queue otherwise.
  */
 int queue_length(queue_t queue);
-
-void queue_print(queue_t queue);
 
 #endif /* _QUEUE_H */

@@ -2,7 +2,12 @@
 
 Asking Questions:
 uthread_ctx_switch error so auto handled sense and we not worry, right?
-use global variable inside or function returned?...setting direct and reading
+
+coverage
+comments add
+match header to it error part
+save files with proper standard
+delete this part
 */
 
 #include "uthread.h"
@@ -27,6 +32,7 @@ struct uthread_tcb {
     uthread_ctx_t* thread_context;
 };
 
+/* Since we have a function to allow accessing the current thread, the convention we adopted is that when we set the current thread, we use the global variable. However, when we access it, we call this function.*/
 struct uthread_tcb* uthread_current(void) { return currently_executing_thread; }
 
 void uthread_yield(void) {
