@@ -169,13 +169,11 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
 
     /*Free memory for the queue objects*/
     queue_iterate(ready_queue, (queue_func_t)uthread_destroy);
-    queue_iterate(ready_queue, (queue_func_t)queue_delete);
     queue_destroy(ready_queue);
 
     // better practice to do it, even though programs should end with
     // idle_thread
     queue_iterate(zombie_queue, (queue_func_t)uthread_destroy);
-    queue_iterate(zombie_queue, (queue_func_t)queue_delete);
     queue_destroy(zombie_queue);
 
     return 0;
