@@ -106,7 +106,7 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
     zombie_queue = queue_create();
 
     // Checking that the creation does not fail
-    if(ready_queue == NULL || zombie_queue == NULL) return -1;
+    if (ready_queue == NULL || zombie_queue == NULL) return -1;
 
     /* There is no need to initialize currently executing thread because as
      * soon as we perform uthread_run(), we also perform uthread_yield() as
@@ -115,7 +115,7 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
         (struct uthread_tcb*)malloc(sizeof(struct uthread_tcb));
 
     // Handle unsuccessful memory allocation
-    if(currently_executing_thread == NULL) return -1;
+    if (currently_executing_thread == NULL) return -1;
     currently_executing_thread->thread_context =
         (uthread_ctx_t*)malloc(sizeof(uthread_ctx_t));
 
