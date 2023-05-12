@@ -1,19 +1,30 @@
 # Target library...variable quiet, turn on and off debug
-lib 		:= libuthread.a
+libtarget 		:= libuthread.a
 objs    := queue.o uthread.o context.o preempt.o sem.o
 
 # removed -Werror for now
 
 CC			:= gcc
-CFLAGS  := -Wall -Wextra -MMD -g
+CFLAGS  := -Wall -Wextra -Werror -MMD -g
+CFLAGS  += -g
 
-all: $(lib)
+ifneq ($(V),1)
+Q = @
+endif
 
-$(lib): $(objs)
-	ar rcs $@ $^
+all: $(libtarget)
+
+deps := $(patsubst %.o,%.d,$(objs))
+-include $(deps)
+
+$(libtarget): $(objs)
+	@echo "CC	$@"
+	$(Q)ar rcs $@ $^
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	@echo "CC	$@"
+	$(Q)$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f *.o *.d *.a
+	@echo "CLEAN"
+	$(Q)rm -f $(libtarget) $(objs) $(deps)

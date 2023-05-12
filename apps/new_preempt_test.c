@@ -37,7 +37,7 @@ void thread_func1(void *arg) {
 int main(void) {
     uthread_run(true, thread_func1, NULL);
 
-    printf("Test complete.\n");
+    printf("Test completed.\n");
 
     return 0;
 }
