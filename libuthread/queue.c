@@ -1,8 +1,8 @@
+#include "queue.h"
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "queue.h"
 
 struct node {
     void *data;
