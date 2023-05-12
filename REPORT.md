@@ -13,6 +13,7 @@
     - [Preemption](#preemption-1)
   - [Debugging](#debugging)
   - [Acknowledgements](#acknowledgements)
+
 ## Queue
 We chose to implement the `queue` using a linked list with head and tail
 pointer. This is because we need to be able to add and remove elements from the
@@ -114,7 +115,10 @@ steals the resource and thread A never executes. Based on our discussion with
 the teaching staff, we are not making sure to delete the memory associated to
 thread A (the only memory leak we have in our test cases) because technically,
 this corner case is user's fault and thus, as any good documentation, we inform
-all users to be aware of this scenario.
+all users to be aware of this scenario. We think that a possible solution to the
+starvation issue is to implement a multi-level feedback queue where the priority
+is increased as the number of times a resource is freed but the blocked thread
+is unable to access it increases.
 
 ## Preemption
 In order to implement preemption, we used the `setitimer` function to set up a
@@ -127,23 +131,51 @@ When preemption is enabled, the `SIGVTALRM` signal is unblocked, which allows
 the signal handler to be invoked. When preemption is disabled, the `SIGVTALRM`
 signal is blocked, which prevents the signal handler from being invoked.
 
+We also make sure to restore our old action and timer so that our library
+remains transparent to our user i.e., the user's program's initial state is
+restored after we're done.
+
 ## Testing
 ### Queue
 We tested the queue by writing unit tests that cover all of the functions in the
 queue. We tested the queue by adding and removing data from the queue and
 checking that the data was added and removed correctly. We additionally wrote
 tests for every error case in the queue functions to ensure that passing null
-pointers or invalid data would not cause the program to crash.
+pointers or invalid data would not cause the program to crash. In total, we have
+implemented 
 
 ### Preemption
 Preemption proved to be the most difficult part of the project to test. We had
 to make sure that the timer was set up correctly and that the timer handler was
-being invoked at the correct times. It was difficult to determine whether
-preemption was actually kicking in due to the raw execution speed of
-incrementing a variable. Our solution to this problem was to introduce some
-latency with print statements, but only every 100000000 iterations to prevent
-the output from being too cluttered. This allowed us to see that the timer
-handler was being invoked at the correct times without setting an infinite loop.
+being invoked at the correct times. In order to test for preemption, we create a
+thread that calls a `busy_loop` which is a loop executing for a long enough time
+to fire our alarm signal and call the handler. This preemption happens
+successfully because we see that instead of finishing this busy loop, a context
+switch to another function happens successfully (we know this from printed
+values on the screen) and this new thread yields properly and we were able to
+see that thread 2 was again preempted successfully. Two key points to talk about
+here are:
+- We preferred using this busy loop over an infinite loop where the infinite
+  loop runs based on a flag in one thread, and the other thread (which would
+  only be called if preemption works correctly) would set this flag to false
+  because our test case allows us to go back and forth between the threads
+  multiple times, and thus, it is a more robust measure. We are able to print
+  statements at appropropriate times to also have an understanding (intuitive
+  idea) of the frequency of this preemption. Having such extensive multiple
+  iterations back and forth from/to our threads are one of the few ways to test
+  that preemption disabling works to the most extent
+- Lastly, in our test case, we also check that the old timer and the old action
+  was restored by creating a dummy handler and a dummy timer. We raise an alarm
+  to see that the dummy handler is working outside the uthread library instead
+  of the handler dealing with interruptions. We check the timer by seeing that
+  it is set to 0 as supposed to be.
+
+It was difficult to determine whether preemption was actually kicking in due to
+the raw execution speed of incrementing a variable. Our solution to this problem
+was to introduce some latency with print statements, but only every 100000000
+iterations to prevent the output from being too cluttered. This allowed us to
+see that the timer handler was being invoked at the correct times without
+setting an infinite loop.
 
 ## Debugging
 We utilized mostly `printf` statements to debug our code since this project
@@ -156,11 +188,9 @@ fix all of them. Please note that we were asked to ignore the context errors
 provided by `valgrind` by the teaching staff.
 
 ## Acknowledgements
-**GNU Documentation**
-
-We were provided multiple links throughout the project prompt to the official
-documentation which helped us understand the signatures and featues of different
-standard c library functions.
+**GNU Documentation** We were provided multiple links throughout the project
+prompt to the official documentation which helped us understand the signatures
+and featues of different standard c library functions.
 
 **Skeleton Code** We used the starter code provided by Professor Porquet at
 `/home/cs150jp/public/p2/`
