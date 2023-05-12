@@ -4,11 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+// struct to store information about each node
 struct node {
     void *data;
     struct node *next;
 };
 
+// struct to store information about the queue
 struct queue {
     struct node *head;
     struct node *tail;
@@ -29,6 +31,7 @@ queue_t queue_create(void) {
 }
 
 int queue_destroy(queue_t queue) {
+    // Handling errors if queue is NULL or it is non-empty
     if (queue == NULL) return -1;
     if (queue->length != 0) return -1;
 
@@ -39,6 +42,7 @@ int queue_destroy(queue_t queue) {
 }
 
 int queue_enqueue(queue_t queue, void *data) {
+    // Handling errors if queue is NULL or data is NULL
     if (queue == NULL || data == NULL) return -1;
 
     struct node *new_node = malloc(sizeof(struct node));
@@ -49,10 +53,11 @@ int queue_enqueue(queue_t queue, void *data) {
     new_node->data = data;
     new_node->next = NULL;
 
+    // Addition of node to empty queue
     if (queue->length == 0) {
         queue->head = new_node;
         queue->tail = new_node;
-    } else {
+    } else {  // Addition of node to non-empty queue
         queue->tail->next = new_node;
         queue->tail = new_node;
     }
@@ -63,6 +68,7 @@ int queue_enqueue(queue_t queue, void *data) {
 }
 
 int queue_dequeue(queue_t queue, void **data) {
+    // Handling errors if queue is NULL or data is NULL
     if (queue == NULL || data == NULL) return -1;
     if (queue->length == 0) return -1;
 
@@ -81,6 +87,7 @@ int queue_dequeue(queue_t queue, void **data) {
 }
 
 int queue_delete(queue_t queue, void *data) {
+    // Handling errors if queue is NULL or data is NULL
     if (queue == NULL || data == NULL) return -1;
 
     struct node *current_node = queue->head;
@@ -117,6 +124,7 @@ int queue_delete(queue_t queue, void *data) {
 }
 
 int queue_iterate(queue_t queue, queue_func_t func) {
+    // Handling errors if queue is NULL or func is NULL
     if (queue == NULL || func == NULL) return -1;
 
     struct node *current_node = queue->head;
@@ -133,6 +141,7 @@ int queue_iterate(queue_t queue, queue_func_t func) {
 }
 
 int queue_length(queue_t queue) {
+    // Handling errors if queue is NULL
     if (queue == NULL) return -1;
 
     return queue->length;
