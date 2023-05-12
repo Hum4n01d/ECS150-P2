@@ -1,8 +1,8 @@
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <uthread.h>
-#include <signal.h>
 #include <sys/time.h>
+#include <uthread.h>
 
 void busy_loop(void) {
     int i = 0;
@@ -39,7 +39,7 @@ void thread_func2(void *arg) {
 void dummy_handler(int signum) {
     (void)signum;
 
-    printf("Dummy handler reached\n");  
+    printf("Dummy handler reached\n");
 }
 
 int main(void) {
@@ -73,13 +73,15 @@ int main(void) {
     struct itimerval old_timer;
     getitimer(ITIMER_VIRTUAL, &old_timer);
 
-    if (old_timer.it_value.tv_sec != 0 || old_timer.it_value.tv_usec != 0 || old_timer.it_interval.tv_sec != 0 || old_timer.it_interval.tv_usec != 0) {
+    if (old_timer.it_value.tv_sec != 0 || old_timer.it_value.tv_usec != 0 ||
+        old_timer.it_interval.tv_sec != 0 ||
+        old_timer.it_interval.tv_usec != 0) {
         printf("ERROR: Timer was not restored\n");
         exit(EXIT_FAILURE);
     }
 
     // Trigger SIGVTALRM to test dummy_handler
-    raise(SIGVTALRM); 
+    raise(SIGVTALRM);
 
     printf("Test complete.\n");
 

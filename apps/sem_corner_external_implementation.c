@@ -5,31 +5,27 @@
  * A B C
  * B C A
  * C A D but A is blocked
-*/
+ */
+#include <sem.h>
 #include <signal.h>
 #include <unistd.h>
-
-#include <sem.h>
 #include <uthread.h>
 
 sem_t sem;
-void test_handler(int signum)
-{
+void test_handler(int signum) {
     (void)signum;
 
     printf("Releasing resource\n");
     sem_up(sem);
 }
 
-static void threadD(void *arg)
-{
+static void threadD(void *arg) {
     (void)arg;
     printf("threadD start (should come before threadA)\n");
     printf("threadD end (should come before threadA)\n");
 }
 
-static void threadC(void *arg)
-{
+static void threadC(void *arg) {
     (void)arg;
     printf("threadC start\n");
 
@@ -41,8 +37,7 @@ static void threadC(void *arg)
     printf("threadC end\n");
 }
 
-static void threadB(void *arg)
-{
+static void threadB(void *arg) {
     (void)arg;
     printf("threadB start\n");
     printf("threadB sem_up start\n");
@@ -51,8 +46,7 @@ static void threadB(void *arg)
     printf("threadB end\n");
 }
 
-static void threadA(void *arg)
-{
+static void threadA(void *arg) {
     (void)arg;
     printf("threadA start\n");
 
@@ -64,8 +58,7 @@ static void threadA(void *arg)
     printf("threadA end\n");
 }
 
-int main(void)
-{
+int main(void) {
     printf("main start\n");
     sem = sem_create(0);
 
