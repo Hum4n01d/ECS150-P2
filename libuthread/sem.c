@@ -12,8 +12,7 @@ struct semaphore {
 };
 
 sem_t sem_create(size_t count) {
-    struct semaphore* created_semaphore =
-        (struct semaphore*)malloc(sizeof(struct semaphore));
+    sem_t created_semaphore = (sem_t)malloc(sizeof(struct semaphore));
 
     // Handle memory allocation error
     if (created_semaphore == NULL) return NULL;
