@@ -30,8 +30,6 @@ struct sigaction sa, old_sa;
 struct itimerval timer, old_timer;
 sigset_t block_signal_set;
 
-bool global_preempt = false;
-
 void interrupt_handler(int signum) {
     (void)signum;
 
@@ -40,10 +38,7 @@ void interrupt_handler(int signum) {
 }
 
 void preempt_start(bool preempt) {
-    // Update global preempt flag
-    global_preempt = preempt;
-
-    if (!global_preempt) return;
+    if (!preempt) return;
 
     // Initialize block signal set
     sigemptyset(&block_signal_set);
@@ -66,8 +61,6 @@ void preempt_start(bool preempt) {
 }
 
 void preempt_stop(void) {
-    if (!global_preempt) return;
-
     printf("PREEMPTION STOPPED\n");
 
     // Restore previous action associated to virtual alarm signals
@@ -78,15 +71,11 @@ void preempt_stop(void) {
 }
 
 void preempt_enable(void) {
-    if (!global_preempt) return;
-
     // Unblock SIGVTALRM
     sigprocmask(SIG_UNBLOCK, &block_signal_set, NULL);
 }
 
 void preempt_disable(void) {
-    if (!global_preempt) return;
-
     // Block SIGVTALRM
     sigprocmask(SIG_BLOCK, &block_signal_set, NULL);
 }

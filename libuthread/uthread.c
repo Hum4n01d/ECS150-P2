@@ -152,7 +152,13 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
     while (queue_length(ready_queue)) {
         uthread_yield();
         // Destroy all threads in zombie queue
+        preempt_enable();
         queue_iterate(zombie_queue, (queue_func_t)uthread_destroy);
+        preempt_disable();
+    }
+
+    if (preempt) {
+        preempt_stop();
     }
 
     // Free the memory for currently active thread
@@ -172,9 +178,6 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
     queue_iterate(zombie_queue, (queue_func_t)queue_delete);
     queue_destroy(zombie_queue);
 
-    if (preempt) {
-        preempt_stop();
-    }
     return 0;
 }
 
