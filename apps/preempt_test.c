@@ -6,21 +6,29 @@
 
 void busy_loop(void) {
     int i = 0;
+
     while (i < 1000000000) {
         i++;
 
+        // Print status every 100 million iterations to show progress without
+        // cluttering output
         if (i % 100000000 == 0) {
             printf("\tThread 2 run #%d\n", i);
         }
+
+        // Do not yield to other threads, this is how we test preemption
     }
 }
 
 void thread_func1(void *arg) {
     (void)arg;
 
+    // Run normal loop
     printf("=== Thread 1 starting ===\n");
     for (int i = 0; i < 20; i++) {
         printf("Thread 1 run #%d\n", i);
+
+        // Yield to thread 2
         uthread_yield();
     }
     printf("=== Thread 1 done ===\n");
@@ -29,8 +37,10 @@ void thread_func1(void *arg) {
 void thread_func2(void *arg) {
     (void)arg;
 
+    // Create thread 1
     uthread_create(thread_func1, NULL);
 
+    // Run busy loop
     printf("=== Thread 2 starting ===\n");
     busy_loop();
     printf("=== Thread 2 done ===\n");
