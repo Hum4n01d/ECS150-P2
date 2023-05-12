@@ -1,15 +1,3 @@
-/*
-
-Asking Questions:
-uthread_ctx_switch error so auto handled sense and we not worry, right?
-
-coverage
-comments add
-match header to it error part
-save files with proper standard
-delete this part
-*/
-
 #include "uthread.h"
 
 #include <assert.h>
@@ -117,11 +105,17 @@ int uthread_run(bool preempt, uthread_func_t func, void* arg) {
     ready_queue = queue_create();
     zombie_queue = queue_create();
 
+    // Checking that the creation does not fail
+    if(ready_queue == NULL || zombie_queue == NULL) return -1;
+
     /* There is no need to initialize currently executing thread because as
      * soon as we perform uthread_run(), we also perform uthread_yield() as
      * queue_length is more than or equal to 1 everytime*/
     currently_executing_thread =
         (struct uthread_tcb*)malloc(sizeof(struct uthread_tcb));
+
+    // Handle unsuccessful memory allocation
+    if(currently_executing_thread == NULL) return -1;
     currently_executing_thread->thread_context =
         (uthread_ctx_t*)malloc(sizeof(uthread_ctx_t));
 
