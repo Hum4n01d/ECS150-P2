@@ -16,8 +16,6 @@
   - [Debugging](#debugging)
   - [Acknowledgements](#acknowledgements)
 
-[Todo]
-
 ## Queue
 
 We chose to implement the `queue` using a linked list with head and tail
