@@ -63,8 +63,7 @@ int queue_enqueue(queue_t queue, void *data) {
 }
 
 int queue_dequeue(queue_t queue, void **data) {
-    if (queue == NULL) return -1;
-    if (data == NULL) return -1;
+    if (queue == NULL || data == NULL) return -1;
     if (queue->length == 0) return -1;
 
     struct node *current_node = queue->head;
@@ -82,8 +81,7 @@ int queue_dequeue(queue_t queue, void **data) {
 }
 
 int queue_delete(queue_t queue, void *data) {
-    if (queue == NULL) return -1;
-    if (data == NULL) return -1;
+    if (queue == NULL || data == NULL) return -1;
 
     struct node *current_node = queue->head;
     struct node *previous_node = NULL;
@@ -119,8 +117,7 @@ int queue_delete(queue_t queue, void *data) {
 }
 
 int queue_iterate(queue_t queue, queue_func_t func) {
-    if (queue == NULL) return -1;
-    if (func == NULL) return -1;
+    if (queue == NULL || func == NULL) return -1;
 
     struct node *current_node = queue->head;
     struct node *next_node = NULL;
