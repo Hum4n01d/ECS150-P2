@@ -1,9 +1,3 @@
-/*
-Queue destroy but each element? Iterate over with delete?
-Why blocked queue as just enter into semaphore queue, and context switch when
-out?
-Corner case starvation not prevented
-*/
 #include "sem.h"
 
 #include <stddef.h>

@@ -1,33 +1,8 @@
 /*
 
 Asking Questions:
-Memory see for own test cases
-Can't think of better ones....old action part so signal do we??
-
-not requested so skip preemption!!
-
-no need global?
-block or setmask?
-
-
-Warning for ours
 uthread_ctx_switch error so auto handled sense and we not worry, right?
 use global variable inside or function returned?...setting direct and reading
-preempt disable and enable where in uthread.c and sem.c
-All errors see do
-waiting queue delete if destroy before?
-
-
-preempt test case OK? and how about sleep/print issues?
-
-Report what all write?
-Queue test cases 20?
-
-MakeFile ok?m
-
-Error do we if sem_up and down not properly sense as waiting queue possible
-stuff remains? Starvation ideation help please
-
 */
 
 #include "uthread.h"

@@ -1,13 +1,3 @@
-/*
-This preemption API is not meant to be exposed to user threads, it should stay
-completely transparent for them. Whenever the user code of a thread is running,
-preemption should be enabled. What does this mean?
-
-Means that only first uthread_run has preempt told and global variable it so not
-each thread able to change it.
-
-* files modified only
-*/
 #include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
