@@ -39,7 +39,7 @@ int queue_destroy(queue_t queue) {
 }
 
 int queue_enqueue(queue_t queue, void *data) {
-    if (queue == NULL) return -1;
+    if (queue == NULL || data == NULL) return -1;
 
     struct node *new_node = malloc(sizeof(struct node));
 
