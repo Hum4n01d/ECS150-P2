@@ -1,5 +1,5 @@
 # Target library...variable quiet, turn on and off debug
-libtarget 		:= libuthread.a
+lib 		:= libuthread.a
 objs    := queue.o uthread.o context.o preempt.o sem.o
 
 # removed -Werror for now
@@ -12,12 +12,12 @@ ifneq ($(V),1)
 Q = @
 endif
 
-all: $(libtarget)
+all: $(lib)
 
 deps := $(patsubst %.o,%.d,$(objs))
 -include $(deps)
 
-$(libtarget): $(objs)
+$(lib): $(objs)
 	@echo "CC	$@"
 	$(Q)ar rcs $@ $^
 
@@ -27,4 +27,4 @@ $(libtarget): $(objs)
 
 clean:
 	@echo "CLEAN"
-	$(Q)rm -f $(libtarget) $(objs) $(deps)
+	$(Q)rm -f $(lib) $(objs) $(deps)
