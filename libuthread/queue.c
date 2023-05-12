@@ -1,10 +1,8 @@
-#include "queue.h"
-
-#include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "queue.h"
 
 struct node {
     void *data;
