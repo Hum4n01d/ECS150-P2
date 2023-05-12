@@ -83,7 +83,7 @@ multiple sem objects, then each sem object should be accountable for the threads
 within which it was called. Thus, having waiting queues inside sem objects is
 better than a blocked queue in uthread.
 
-**Important note on preemption** We temporarily disable preemption whenever we
+**Important note on preemption:** We temporarily disable preemption whenever we
 are modifying any global variables (like enqueing into the ready queue) because
 we do not want the timer handler to be invoked while we are executing a critical
 section. Disabling preemption ensures that the set of instructions happens
@@ -122,10 +122,10 @@ is unable to access it increases.
 
 ## Preemption
 In order to implement preemption, we used the `setitimer` function to set up a
-timer that would send a `SIGVTALRM` signal to the program every 10 ms (frequency
-of 100Hz). We then set up a signal handler for the `SIGVTALRM` signal that would
-call `uthread_yield` to yield to the next thread. This will prevent a greedy
-thread from running forever and preventing other threads from running.
+timer that would send a `SIGVTALRM` signal to the program every 10 milli seconds
+(frequency of 100Hz). We then set up a signal handler for the `SIGVTALRM` signal
+that would call `uthread_yield` to yield to the next thread. This will prevent a
+greedy thread from running forever and preventing other threads from running.
 
 When preemption is enabled, the `SIGVTALRM` signal is unblocked, which allows
 the signal handler to be invoked. When preemption is disabled, the `SIGVTALRM`
@@ -168,7 +168,7 @@ here are:
   was restored by creating a dummy handler and a dummy timer. We raise an alarm
   to see that the dummy handler is working outside the uthread library instead
   of the handler dealing with interruptions. We check the timer by seeing that
-  it is set to 0 as supposed to be.
+  it is restored to 0 which is the initial value before `uthread_run` is called.
 
 It was difficult to determine whether preemption was actually kicking in due to
 the raw execution speed of incrementing a variable. Our solution to this problem
